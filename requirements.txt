@@ -1,0 +1,21 @@
+# For Apache Airflow
+apache-airflow
+
+# For Kafka integration
+kafka-python
+
+# For Supabase database connection
+supabase
+
+# For asynchronous HTTP requests in the producer
+aiohttp
+
+# For reading CSV data in the producer
+pandas
+
+# For Apache Flink streaming job
+apache-flink
+
+# Commonly used for HTTP requests and as a dependency
+requests
+certifi
