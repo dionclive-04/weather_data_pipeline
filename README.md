@@ -124,13 +124,11 @@ SUPABASE_KEY=your_supabase_key
 ```
 weather-data-pipeline/
 │
-├── data_ingestion/         # Kafka producer scripts
-├── flink_processing/       # Flink consumer/producer jobs
-├── database/               # Scripts for Supabase/Postgres integration
-├── visualization/          # Grafana dashboards
+├── aggreagate_incoming_data.py       # Kafka producer scripts
+├── consume_aggregated.py       # Flink consumer/producer jobs
+├── producer_weather.py               # Scripts for Supabase/Postgres integration         
 ├── requirements.txt
 ├── README.md
-└── .env.example
 ```
 
 ---
