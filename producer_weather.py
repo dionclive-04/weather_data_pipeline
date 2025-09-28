@@ -11,8 +11,8 @@ import os
 
 class WeatherProducer:
     def __init__(self):
-        self.df = pd.read_csv(r'/home/dion/airflow_project/app/top_1000_cities.csv')
-        self.open_weather_api = '75d0e4309d0b73172a1e9fe1c73f2240'
+        self.df = pd.read_csv(r'/home/dion/airflow_project/app/top_1000_cities.csv') #Keep top 1500 cities around the world
+        self.open_weather_api = 'YOUR_OPEN_WEATHER_API_KEY'
         self.producer = KafkaProducer(bootstrap_servers=['localhost:9092'], value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
     async def fetch_weather(self, session, lat, lon):
