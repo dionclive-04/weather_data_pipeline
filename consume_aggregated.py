@@ -28,7 +28,7 @@ def convert_to_ppb(ugm3, mw):
         return None
     return (ugm3 * 24.45) / mw
 
-#Takes other pm25, pm10, no2, o3 and calculate the aqi based on the EU/US standarad
+#Takes pm25, pm10, no2, o3 and calculate the aqi based on the EU/US standarad
 def calculate_aqi(pm25, pm10, no2, o3):
     sub_indices = []
     if pm25 is not None:
