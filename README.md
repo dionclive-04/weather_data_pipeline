@@ -1,10 +1,10 @@
-# 🌤️ Real-Time Weather & Air Quality Data Pipeline
+# Real-Time Weather & Air Quality Data Pipeline
 
 **Real-time Data Engineering Project | Kafka | Apache Flink | Supabase | Grafana**
 
 ---
 
-## 🚀 Project Overview
+## Project Overview
 
 This project is a **real-time data pipeline** that fetches live weather and air quality data from **OpenWeather API**, processes it through **Apache Kafka** and **Apache Flink**, stores it in **Supabase (Postgres)**, and visualizes it in **Grafana**.
 
@@ -12,7 +12,7 @@ The pipeline is designed to handle **high-throughput data streams**, enabling ne
 
 ---
 
-## 🛠️ How It Works
+## How It Works
 
 1. **Data Ingestion**
 
@@ -53,7 +53,7 @@ The pipeline is designed to handle **high-throughput data streams**, enabling ne
 
 ---
 
-## 📊 Key Features
+## Key Features
 
 * Handles **high-frequency data streams** (3,000 messages/min)
 * Real-time processing with **Apache Flink**
@@ -64,7 +64,7 @@ The pipeline is designed to handle **high-throughput data streams**, enabling ne
 
 ---
 
-## 💻 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -103,14 +103,14 @@ SUPABASE_KEY=your_supabase_key
 
 ---
 
-## 📈 Visualization
+## Visualization
 
 * Connect **Grafana** to your Supabase database
 * Use pre-built dashboards to monitor **real-time weather and AQI data**
 
 ---
 
-## ⭐ Why This Project?
+## Why This Project?
 
 * **Real-time analytics** for weather and air quality
 * Demonstrates **end-to-end data engineering workflow**
@@ -149,11 +149,7 @@ weather-data-pipeline/
 
 Dion Clive Saldanha
 
-* GitHub: [https://github.com/yourusername](https://github.com/yourusername)
-* LinkedIn: [https://linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
+* GitHub: https://github.com/dionclive-04
+* LinkedIn: https://www.linkedin.com/in/dion-saldanha-97b2aa243/
 
 ---
-
-If you want, I can also **make a version with GIFs/screenshots of Grafana dashboards and pipeline flow**, which will **increase attention and engagement** drastically on GitHub.
-
-Do you want me to do that next?
