@@ -28,6 +28,7 @@ def convert_to_ppb(ugm3, mw):
         return None
     return (ugm3 * 24.45) / mw
 
+#Takes other pm25, pm10, no2, o3 and calculate the aqi based on the EU/US standarad
 def calculate_aqi(pm25, pm10, no2, o3):
     sub_indices = []
     if pm25 is not None:
@@ -49,10 +50,11 @@ AQI_BATCH_SIZE = 50
 SUPABASE_URL = 'YOUR_SUPABASE_URL'
 SUPABASE_KEY = 'YOUR_SUPABASE_API_KEY'
 def consume_weather_messages():
+    #Establish your connection with supabse
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
     weather_consumer = KafkaConsumer(
-        'aggregated-weather-topics',
-        bootstrap_servers=['localhost:9092'],
+        'aggregated-weather-topics', # Topic where data is consumed
+        bootstrap_servers=['localhost:9092'] # the port on which the kafka topic will run ,
         auto_offset_reset='earliest',
         group_id='weather_aggregated_group_test',
         value_deserializer=lambda v: json.loads(v.decode('utf-8')),
@@ -60,9 +62,10 @@ def consume_weather_messages():
     )
     batch_weather_data = []
     weather_msgs = weather_consumer.poll(1.0)
+    # Iterate over the messages
     for _, weather_list in weather_msgs.items():
         for weather_msg in weather_list:
-            weather = weather_msg.value
+            weather = weather_msg.value # Weather message value
             weather_data = {
                 "country": weather.get("country"),
                 "state": None,
@@ -80,17 +83,20 @@ def consume_weather_messages():
                 "created_at": weather['created_at']
             }
             batch_weather_data.append(weather_data)
+            #Instead of doing api call 1500 times a minute, keep a batch of 50 messages a time to avoid api overload and provide optimizations
             while len(batch_weather_data) >= WEATHER_BATCH_SIZE:
                 batch = batch_weather_data[:WEATHER_BATCH_SIZE]
                 supabase.table('weather_aqi_data').insert(batch).execute()
+                # Move the batch size accordingly to point to the next set of batch
                 batch_weather_data = batch_weather_data[WEATHER_BATCH_SIZE:]
     print('Weather batch processed.')
 
+#Function to consume aqi messages
 def consume_aqi_messages():
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY) # Creating a supabase client
     aqi_consumer = KafkaConsumer(
-        'aggregated_aqi_producers',
-        bootstrap_servers=['localhost:9092'],
+        'aggregated_aqi_producers', #Chossing the topic to consume messages from 
+        bootstrap_servers=['localhost:9092'], # Runs on port 9092
         auto_offset_reset='earliest',
         group_id='aqi_group_test',
         value_deserializer=lambda v: json.loads(v.decode('utf-8')),
@@ -118,9 +124,11 @@ def consume_aqi_messages():
                 "country": aqi.get('country', "Unknown"),
             }
             batch_aqi_data.append(aqi_data)
+            #Instead of doing api call 1500 times a minute, keep a batch of 50 messages a time to avoid api overload and provide optimizations
             while len(batch_aqi_data) >= AQI_BATCH_SIZE:
                 batch = batch_aqi_data[:AQI_BATCH_SIZE]
                 supabase.table('aqi_data').insert(batch).execute()
+                # Move the batch size accordingly to point to the next set of batch
                 batch_aqi_data = batch_aqi_data[AQI_BATCH_SIZE:]
     print('AQI batch processed.')
 
@@ -133,26 +141,26 @@ default_args = {
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    'retry_delay': timedelta(minutes=5) # if any tasks fail, retry to run it within 5 minutes,
 }
 
 with DAG(
-    dag_id='consumer_aggregated_dag',
+    dag_id='consumer_aggregated_dag', #Define your own dag-id
     default_args=default_args,
-    description='Consume weather & AQI data and insert into Supabase',
-    schedule=timedelta(minutes=5),  # Airflow 2.7+ preferred parameter
-    start_date=datetime(2025, 9, 24),
+    description='Consume weather & AQI data and insert into Supabase', #Choose an appropriate
+    schedule=timedelta(minutes=5), # Run the dag every 5 mins, so the grafana dashboard is updated every 5 mins
+    start_date=datetime(2025, 9, 24), # Keep youur own date
     catchup=False
 ) as dag:
 
     consume_weather_task = PythonOperator(
         task_id='consume_weather_messages',
-        python_callable=consume_weather_messages
+        python_callable=consume_weather_messages # Calls the function to write weather data into postgres
     )
 
     consume_aqi_task = PythonOperator(
         task_id='consume_aqi_messages',
-        python_callable=consume_aqi_messages
+        python_callable=consume_aqi_messages #Calls the function to write aqi data into postgres
     )
 
-    consume_weather_task >> consume_aqi_task
+    consume_weather_task >> consume_aqi_task # Build a dag graph which shows the dependency
