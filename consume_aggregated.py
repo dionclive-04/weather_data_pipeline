@@ -22,6 +22,7 @@ no2_breakpoints = [(0, 53, 0, 50), (54, 100, 51, 100), (101, 360, 101, 150),
                    (361, 649, 151, 200), (650, 1249, 201, 300), (1250, 2049, 301, 500)]
 o3_breakpoints = [(0, 54, 0, 50), (55, 70, 51, 100), (71, 85, 101, 150),
                   (86, 105, 151, 200), (106, 200, 201, 300)]
+
 def convert_to_ppb(ugm3, mw):
     if ugm3 is None:
         return None
@@ -45,8 +46,8 @@ def calculate_aqi(pm25, pm10, no2, o3):
 # -------------------------------
 WEATHER_BATCH_SIZE = 50
 AQI_BATCH_SIZE = 50
-SUPABASE_URL = 'https://pxutjkudmwsrgeqmsxri.supabase.co'
-SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4dXRqa3VkbXdzcmdlcW1zeHJpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjEzMTM5MSwiZXhwIjoyMDcxNzA3MzkxfQ.hT2yuOnCoLuA9xD89TlQOK-8vB8tSnC67EXMndB3Mvw'
+SUPABASE_URL = 'YOUR_SUPABASE_URL'
+SUPABASE_KEY = 'YOUR_SUPABASE_API_KEY'
 def consume_weather_messages():
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
     weather_consumer = KafkaConsumer(
