@@ -79,7 +79,7 @@ The pipeline is designed to handle **high-throughput data streams**, enabling ne
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/weather-data-pipeline.git
+git clone https://github.com/yourusername/weather-data-pipeline.git](https://github.com/dionclive-04/weather_data_pipeline.git
 cd weather-data-pipeline
 ```
 
