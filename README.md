@@ -1,153 +1,68 @@
-# Real-Time Weather & Air Quality Data Pipeline
+# Weather & Air Quality Streaming Pipeline
 
-**Real-time Data Engineering Project | Kafka | Apache Flink | Supabase | Grafana**
+A Python data engineering project exploring weather and air quality ingestion, Kafka messaging, Flink windowed aggregation, and storage in Supabase.
 
----
+## Architecture
 
-## Project Overview
-
-This project is a **real-time data pipeline** that fetches live weather and air quality data from **OpenWeather API**, processes it through **Apache Kafka** and **Apache Flink**, stores it in **Supabase (Postgres)**, and visualizes it in **Grafana**.
-
-The pipeline is designed to handle **high-throughput data streams**, enabling near real-time insights into global weather conditions and air quality across major cities.
-
----
-
-## How It Works
-
-1. **Data Ingestion**
-
-   * Fetches **3,000 messages per minute** from OpenWeather API:
-
-     * **1,500 weather updates** from top cities
-     * **1,500 Air Quality Index (AQI) updates** from 1,500 cities
-   * Publishes data into a **Kafka producer**.
-
-2. **Data Processing with Apache Flink**
-
-   * Consumes data from the Kafka topic
-   * Performs transformations and enrichment
-   * Publishes processed data to another Kafka topic
-
-3. **Data Storage**
-
-   * Consumes the processed data
-   * Writes it into **Supabase (PostgreSQL)** for persistent storage
-
-4. **Visualization**
-
-   * Grafana connects to Supabase to visualize the data
-   * Real-time dashboards display weather and AQI metrics globally
-
----
-
-## ⚡ Tech Stack
-
-| Layer             | Technology            |
-| ----------------- | --------------------- |
-| Data Source       | OpenWeather API       |
-| Messaging Queue   | Apache Kafka          |
-| Stream Processing | Apache Flink          |
-| Database          | Supabase (PostgreSQL) |
-| Visualization     | Grafana               |
-| Language          | Python                |
-
----
-
-## Key Features
-
-* Handles **high-frequency data streams** (3,000 messages/min)
-* Real-time processing with **Apache Flink**
-* Scalable **Kafka-based architecture**
-* Persistent storage in **Supabase (Postgres)**
-* Interactive **Grafana dashboards**
-* Supports **weather and air quality monitoring** for 1,500 cities
-
----
-
-## Getting Started
-
-### Prerequisites
-
-* Python 3.10+
-* Apache Kafka
-* Apache Flink
-* Supabase account / Postgres
-* Grafana
-
-### Installation
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/yourusername/weather-data-pipeline.git
-cd weather-data-pipeline
+```text
+OpenWeather API
+    -> Python producer
+    -> Kafka: weather-topic / aqi_topic_producer
+    -> Flink: two-minute processing-time windows, grouped by city
+    -> Kafka: aggregated-weather-topic / aggregated_aqi_producer
+    -> Airflow consumer tasks
+    -> Supabase (PostgreSQL)
+    -> Grafana (external dashboard setup)
 ```
 
-2. Install dependencies:
+## Repository guide
+
+| File | Responsibility |
+| --- | --- |
+| [producer_weather.py](producer_weather.py) | Fetch weather and air pollution data asynchronously and publish JSON to Kafka |
+| [aggreagate_incoming_data.py](aggreagate_incoming_data.py) | Parse records, convert weather temperatures to Celsius, aggregate by city, and publish results |
+| [consume_aggregated.py](consume_aggregated.py) | Define an Airflow DAG with consumer tasks that batch inserts into Supabase |
+| [requirements.txt](requirements.txt) | Python dependencies |
+
+The aggregation filename above matches the existing repository spelling.
+
+## Setup status
+
+This repository contains the pipeline scripts. It is a learning project that requires configuration and integration fixes before an end-to-end run; it is not a one-command deployment.
 
 ```bash
+git clone https://github.com/dionclive-04/weather_data_pipeline.git
+cd weather_data_pipeline
 pip install -r requirements.txt
 ```
 
-3. Configure your **OpenWeather API key** in `.env`:
+Use an isolated Python environment. You will also need Kafka, a compatible Flink/PyFlink and Java installation, the Kafka connector JARs, Airflow, an OpenWeather account, and Supabase.
 
-```env
-OPENWEATHER_API_KEY=your_api_key
-KAFKA_BROKER=localhost:9092
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_key
-```
+Before running:
 
-4. Start Kafka, Flink, and Supabase
-5. Run the Python scripts to start the pipeline
+1. Supply a city CSV containing `name`, `country_name`, `latitude`, and `longitude`. The producer currently references a machine-specific path; the CSV is not included.
+2. Configure the producer's OpenWeather credential and the consumer's Supabase credentials through environment variables or a secret manager before deployment. The current scripts contain placeholders; they do not load a `.env` file.
+3. Update the absolute connector JAR paths in the Flink job for your installation.
+4. Align the consumer topic names with the Flink output topics. The current consumer uses `aggregated-weather-topics` and `aggregated_aqi_producers`, while Flink emits the singular names shown in the diagram.
+5. Fix the missing comma following the weather consumer's `bootstrap_servers` argument in `consume_aggregated.py`.
+6. Create the Supabase tables expected by the consumer: `weather_aqi_data` and `aqi_data`. A schema migration is not included.
 
----
+After resolving those requirements, run the producer and Flink job as separate processes and load the consumer DAG into Airflow. The DAG is configured to run every five minutes. Grafana dashboards must be configured separately; dashboard exports are not included.
 
-## Visualization
+## Engineering notes
 
-* Connect **Grafana** to your Supabase database
-* Use pre-built dashboards to monitor **real-time weather and AQI data**
+- Aggregations use processing time and two-minute windows.
+- The producer fetches weather and AQI concurrently in batches of 50 cities.
+- Actual throughput depends on the city list, API limits, latency, and infrastructure. This repository does not include a throughput benchmark.
+- The consumer batches inserts in groups of 50. Handling incomplete batches, retries, and replay without duplicate writes needs further work.
 
----
+## Next milestones
 
-## Why This Project?
+- Move credentials, paths, broker addresses, and topic names into validated configuration.
+- Add fixtures and tests for parsing, aggregation, and partial API failures.
+- Include database schema, reproducible service setup, and dashboard exports.
+- Measure end-to-end latency, message loss, and replay behavior.
 
-* **Real-time analytics** for weather and air quality
-* Demonstrates **end-to-end data engineering workflow**
-* Built using industry-standard **streaming and messaging tools**
-* Highly scalable and modular
+## Author
 
----
-
-## 📂 Repository Structure
-
-```
-weather-data-pipeline/
-│
-├── aggreagate_incoming_data.py       # Kafka producer scripts
-├── consume_aggregated.py       # Flink consumer/producer jobs
-├── producer_weather.py               # Scripts for Supabase/Postgres integration         
-├── requirements.txt
-├── README.md
-```
-
----
-
-## 🔗 Links
-
-* OpenWeather API: [https://openweathermap.org/api](https://openweathermap.org/api)
-* Supabase: [https://supabase.com](https://supabase.com)
-* Grafana: [https://grafana.com](https://grafana.com)
-* Apache Kafka: [https://kafka.apache.org](https://kafka.apache.org)
-* Apache Flink: [https://flink.apache.org](https://flink.apache.org)
-
----
-
-## 📬 Contact
-
-Dion Clive Saldanha
-
-* GitHub: https://github.com/dionclive-04
-* LinkedIn: https://www.linkedin.com/in/dion-saldanha-97b2aa243/
-
----
+[Dion Clive Saldanha](https://github.com/dionclive-04) · [LinkedIn](https://www.linkedin.com/in/dion-saldanha-97b2aa243/)
